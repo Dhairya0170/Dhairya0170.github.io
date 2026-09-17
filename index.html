@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr. Zeel's Patient Case</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F7F2;
+    --paper-line:#DCE6DF;
+    --ink:#1E2E2A;
+    --ink-soft:#4C5F59;
+    --teal:#1F5C56;
+    --teal-deep:#123B37;
+    --mint:#AFDBCF;
+    --blush:#E98C86;
+    --gold:#C99A3E;
+    --card-radius: 14px;
+    --focus: 3px solid #123B37;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background: linear-gradient(180deg, #E3EEE7 0%, #F4F7F2 260px);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* Clipboard clip */
+  .clip{
+    width:120px;
+    height:34px;
+    background: linear-gradient(180deg,#9AA7A2,#7C8A85);
+    border-radius:10px;
+    margin:0 auto -18px;
+    position:relative;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+  }
+  .clip::before{
+    content:"";
+    position:absolute;
+    top:8px; left:12px; right:12px; bottom:8px;
+    background: linear-gradient(180deg,#C7D0CB,#AAB6B0);
+    border-radius:6px;
+  }
+
+  .chart{
+    background:var(--paper);
+    border:1px solid var(--paper-line);
+    border-radius: var(--card-radius);
+    box-shadow: 0 20px 40px rgba(18,59,55,0.10), 0 2px 6px rgba(18,59,55,0.06);
+    overflow:hidden;
+    position:relative;
+  }
+
+  .chart-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 14px 24px;
+    background: var(--teal-deep);
+    color: #DCEEE8;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.03em;
+  }
+  .chart-topbar .stamp{
+    border:1px solid rgba(220,238,232,0.5);
+    padding:3px 8px;
+    border-radius:4px;
+  }
+
+  section{
+    padding: 28px 28px;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  section:last-of-type{ border-bottom:none; }
+
+  .hero{
+    text-align:left;
+    padding-top:36px;
+  }
+  .hero .tooth{
+    width:46px; height:46px;
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 2.1rem;
+    line-height:1.15;
+    margin:0 0 12px;
+    color:var(--teal-deep);
+  }
+  .hero p{
+    font-size:1.02rem;
+    color:var(--ink-soft);
+    margin:0;
+    max-width:46ch;
+  }
+
+  .field-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:6px;
+    font-size:0.95rem;
+  }
+  .field-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    min-width:88px;
+    padding-top:2px;
+  }
+  h2.section-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--teal);
+    margin:0 0 16px;
+    text-transform:uppercase;
+  }
+  .symptom-list{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+  .symptom-list li{
+    font-size:0.98rem;
+  }
+
+  /* Progress teeth */
+  .progress-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    padding: 16px 28px 0;
+  }
+  .progress-row .tlabel{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--ink-soft);
+    margin-right:4px;
+  }
+  .tooth-dot{
+    width:16px; height:18px;
+  }
+
+  .question{
+    display:block;
+    opacity:0.38;
+    filter: saturate(0.5);
+    pointer-events:none;
+    transition: opacity .35s ease, filter .35s ease;
+    position:relative;
+  }
+  .question.unlocked{
+    opacity:1;
+    filter:none;
+    pointer-events:auto;
+  }
+  .question .lock-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin:10px 0 0;
+  }
+  .question.unlocked .lock-note{
+    display:none;
+  }
+
+  .q-number{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--gold);
+    margin-bottom:6px;
+    display:block;
+  }
+  .q-text{
+    font-size:1.05rem;
+    font-weight:600;
+    margin:0 0 16px;
+    color:var(--ink);
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-align:left;
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--paper-line);
+    background:#fff;
+    border-radius:10px;
+    font-family:inherit;
+    font-size:0.96rem;
+    color:var(--ink);
+    cursor:pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .opt:hover{ border-color: var(--mint); }
+  .opt:focus-visible{ outline: var(--focus); outline-offset:2px; }
+  .opt .letter{
+    flex:0 0 24px;
+    height:24px;
+    border-radius:50%;
+    border:1.5px solid var(--teal);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--teal);
+  }
+  .opt.selected{
+    border-color: var(--teal);
+    background: #EAF5F1;
+  }
+  .opt.selected .letter{
+    background:var(--teal);
+    color:#fff;
+  }
+
+  /* Prescription pad */
+  #result-section{
+    display:none;
+    padding-top:8px;
+  }
+  #result-section.visible{ display:block; }
+
+  .rx-pad{
+    position:relative;
+    background:#fff;
+    border:1.5px solid var(--paper-line);
+    border-radius:10px;
+    padding:26px 24px 22px;
+    margin-top:6px;
+    transform: rotate(-0.6deg);
+    box-shadow: 0 10px 24px rgba(18,59,55,0.10);
+  }
+  .rx-pad::before{
+    content:"";
+    position:absolute;
+    top:-1px; left:16px; right:16px;
+    height:0;
+    border-top:2px dashed #C7D3CC;
+  }
+  .rx-emojis{
+    font-size:1.6rem;
+    margin-bottom:10px;
+    letter-spacing:6px;
+  }
+  .rx-heading{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:1.3rem;
+    color:var(--teal-deep);
+    margin:0 0 4px;
+  }
+  .rx-seal{
+    position:absolute;
+    top:20px; right:22px;
+    width:56px; height:56px;
+    border:2px solid var(--gold);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:8px;
+    color:var(--gold);
+    text-align:center;
+    line-height:1.2;
+    transform:rotate(8deg);
+    opacity:0.85;
+  }
+  .rx-diagnosis{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .rx-line-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--teal);
+    text-transform:uppercase;
+    margin-bottom:4px;
+    letter-spacing:0.04em;
+  }
+  .rx-plan{
+    font-size:1.02rem;
+    margin:0 0 16px;
+    color:var(--ink);
+  }
+  .rx-note{
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    border-top:1px solid var(--paper-line);
+    padding-top:12px;
+    margin:0;
+  }
+  .rx-signature{
+    margin-top:16px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.1rem;
+    color:var(--teal-deep);
+  }
+
+  .footer{
+    text-align:left;
+    padding: 30px 28px 34px;
+  }
+  .footer p{
+    font-size:0.98rem;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .footer .sign{
+    display:block;
+    margin-top:10px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--teal-deep);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .question.visible{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="clip"></div>
+
+  <div class="chart">
+
+    <div class="chart-topbar">
+      <span>RECORD NO. 2512</span>
+      <span class="stamp">CONFIDENTIAL</span>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+      <svg class="tooth" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 6c-5 0-7 3-10 3-4 0-6-3-9-1-3 2-3 8-1 14 1.5 4.5 2 8 3 14 .7 4 2 7 4.5 7 3 0 3-8 4.5-8s1.5 8 4.5 8c2.5 0 3.8-3 4.5-7 1-6 1.5-9.5 3-14 2-6 2-12-1-14-3-2-5 1-9 1-3 0-5-3-10-3 3 0 3 0 6 0z" fill="#1F5C56"/>
+      </svg>
+      <h1>Dr. Zeel's Patient Case</h1>
+      <p>Hey Zeel. I made this small quiz for you. Please scroll and answer.</p>
+    </section>
+
+    <!-- PATIENT DETAILS -->
+    <section>
+      <h2 class="section-title">Patient Details</h2>
+      <div class="field-row">
+        <span class="field-label">Name</span>
+        <span>Dhairya</span>
+      </div>
+      <div class="field-row" style="margin-top:14px;">
+        <span class="field-label">Symptoms</span>
+      </div>
+      <ul class="symptom-list" style="margin-left:98px; margin-top:-8px;">
+        <li>Thinks about his dentist friend a lot</li>
+        <li>Keeps finding reasons to message her</li>
+        <li>Feels nervous about asking her</li>
+      </ul>
+    </section>
+
+    <!-- PROGRESS -->
+    <div class="progress-row" id="progress-row">
+      <span class="tlabel">CASE PROGRESS</span>
+      <svg class="tooth-dot" id="dot-1" viewBox="0 0 16 18" fill="none"><path d="M8 1c-1.7 0-2.3 1-3.3 1-1.3 0-2-1-3-.3-1 .7-1 2.7-.3 4.7.5 1.5.7 2.7 1 4.7.2 1.3.7 2.3 1.5 2.3 1 0 1-2.7 1.5-2.7s.5 2.7 1.5 2.7c.8 0 1.3-1 1.5-2.3.3-2 .5-3.2 1-4.7.7-2 .7-4-.3-4.7-1-.7-1.7.3-3 .3-1 0-1.7-1-3.3-1 1 0 1 0 2 0z" fill="#D8E3DD"/></svg>
+      <svg class="tooth-dot" id="dot-2" viewBox="0 0 16 18" fill="none"><path d="M8 1c-1.7 0-2.3 1-3.3 1-1.3 0-2-1-3-.3-1 .7-1 2.7-.3 4.7.5 1.5.7 2.7 1 4.7.2 1.3.7 2.3 1.5 2.3 1 0 1-2.7 1.5-2.7s.5 2.7 1.5 2.7c.8 0 1.3-1 1.5-2.3.3-2 .5-3.2 1-4.7.7-2 .7-4-.3-4.7-1-.7-1.7.3-3 .3-1 0-1.7-1-3.3-1 1 0 1 0 2 0z" fill="#D8E3DD"/></svg>
+      <svg class="tooth-dot" id="dot-3" viewBox="0 0 16 18" fill="none"><path d="M8 1c-1.7 0-2.3 1-3.3 1-1.3 0-2-1-3-.3-1 .7-1 2.7-.3 4.7.5 1.5.7 2.7 1 4.7.2 1.3.7 2.3 1.5 2.3 1 0 1-2.7 1.5-2.7s.5 2.7 1.5 2.7c.8 0 1.3-1 1.5-2.3.3-2 .5-3.2 1-4.7.7-2 .7-4-.3-4.7-1-.7-1.7.3-3 .3-1 0-1.7-1-3.3-1 1 0 1 0 2 0z" fill="#D8E3DD"/></svg>
+
+    </div>
+
+    <!-- QUIZ -->
+    <section>
+      <h2 class="section-title">Diagnostic Questionnaire</h2>
+
+      <div class="question unlocked" id="q1" data-q="1">
+        <span class="q-number">Question 1 of 3</span>
+        <p class="q-text">Based on the patient's symptoms, what is the most likely diagnosis?</p>
+        <div class="options">
+          <button class="opt" data-letter="A"><span class="letter">A</span> Dental anxiety</button>
+          <button class="opt" data-letter="B"><span class="letter">B</span> Caffeine deficiency</button>
+          <button class="opt" data-letter="C"><span class="letter">C</span> Excessive overthinking</button>
+          <button class="opt" data-letter="D"><span class="letter">D</span> He has a crush on his dentist</button>
+        </div>
+      </div>
+
+      <div class="question" id="q2" data-q="2" style="margin-top:26px;">
+        <span class="q-number">Question 2 of 3</span>
+        <p class="q-text">The patient keeps messaging his dentist friend again and again. What should he do?</p>
+        <div class="options">
+          <button class="opt" data-letter="A"><span class="letter">A</span> Keep talking normally and see where things go</button>
+          <button class="opt" data-letter="B"><span class="letter">B</span> Ask her out sometime</button>
+          <button class="opt" data-letter="C"><span class="letter">C</span> Stop messaging her completely</button>
+        </div>
+        <p class="lock-note">Answer question 1 to unlock</p>
+      </div>
+
+      <div class="question" id="q3" data-q="3" style="margin-top:26px;">
+        <span class="q-number">Question 3 of 3 — Final Treatment Plan</span>
+        <p class="q-text">Dhairya is finally asking Zeel out for a coffee. What should she do?</p>
+        <div class="options">
+          <button class="opt" data-letter="A"><span class="letter">A</span> Deny the date</button>
+          <button class="opt" data-letter="B"><span class="letter">B</span> Ignore this completely</button>
+          <button class="opt" data-letter="C"><span class="letter">C</span> Fix a coffee appointment with him</button>
+        </div>
+        <p class="lock-note">Answer question 2 to unlock</p>
+      </div>
+
+    </section>
+
+    <!-- RESULT -->
+    <section id="result-section">
+      <h2 class="section-title">Diagnosis Result</h2>
+      <div class="rx-pad">
+        <div class="rx-seal">DENTAL<br>BOARD<br>CERTIFIED</div>
+        <div class="rx-emojis" id="rx-emojis"></div>
+        <p class="rx-heading">Official Prescription by Dr. Zeel</p>
+        <p class="rx-diagnosis" id="rx-diagnosis"></p>
+        <p class="rx-line-label">Treatment Plan</p>
+        <p class="rx-plan" id="rx-plan"></p>
+        <p class="rx-note">Note: Please take a screenshot or share this result with patient Dhairya so he can understand your diagnosis.</p>
+        <span class="rx-signature">— Dr. Zeel</span>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <p>Thank you for taking this case, Dr. Zeel. No pressure at all—just a guy who likes talking to you.</p>
+      <span class="sign">— Dhairya</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const answers = {};
+  const teethFilled = { A: '#1F5C56', B: '#1F5C56', C: '#1F5C56', D: '#1F5C56' };
+
+  function fillTooth(qNum){
+    const dot = document.getElementById('dot-' + qNum);
+    if(dot){
+      const path = dot.querySelector('path');
+      path.setAttribute('fill', '#1F5C56');
+    }
+  }
+
+  function selectOption(questionEl, btn){
+    questionEl.querySelectorAll('.opt').forEach(o => {
+      o.classList.remove('selected');
+      o.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.add('selected');
+    btn.setAttribute('aria-pressed', 'true');
+
+    const qNum = questionEl.getAttribute('data-q');
+    answers[qNum] = { letter: btn.dataset.letter, text: btn.textContent.trim() };
+    fillTooth(qNum);
+
+    if(qNum !== '3'){
+      const next = document.getElementById('q' + (parseInt(qNum) + 1));
+      if(next && !next.classList.contains('unlocked')){
+        next.classList.add('unlocked');
+        setTimeout(() => next.scrollIntoView({behavior:'smooth', block:'center'}), 150);
+      }
+    } else {
+      showResult(btn.dataset.letter, btn.textContent.trim());
+    }
+  }
+
+  document.querySelectorAll('.question').forEach(q => {
+    q.querySelectorAll('.opt').forEach(btn => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', () => selectOption(q, btn));
+    });
+  });
+
+  function showResult(letter, text){
+    const resultSection = document.getElementById('result-section');
+    const emojiEl = document.getElementById('rx-emojis');
+    const planEl = document.getElementById('rx-plan');
+    const diagnosisEl = document.getElementById('rx-diagnosis');
+
+    if(letter === 'C'){
+      diagnosisEl.textContent = '';
+      diagnosisEl.style.display = 'none';
+      emojiEl.textContent = '☕ ✨ 🥳';
+      planEl.textContent = 'One coffee appointment with Zeel.';
+    } else {
+      diagnosisEl.textContent = 'Diagnosis: Sadly... No';
+      diagnosisEl.style.display = 'block';
+      emojiEl.textContent = '😔 🩹';
+      planEl.textContent = 'Patient needs to rest and drink plenty of water. Coffee treatment is not recommended at this time.';
+    }
+
+    resultSection.classList.add('visible');
+    setTimeout(() => resultSection.scrollIntoView({behavior:'smooth', block:'start'}), 200);
+  }
+</script>
+
+</body>
+</html>
